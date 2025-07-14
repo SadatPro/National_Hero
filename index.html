@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>নির্বাচন ব্লাস্টার: মির্জা ফখরুলের চূড়ান্ত সমাধান!</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans Bengali', Arial, sans-serif;
+            background: linear-gradient(180deg, #F42A41, #000000); /* Gradient background */
+            overflow: hidden;
+            user-select: none;
+            height: 100vh;
+        }
+
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background-color: transparent; /* Make it transparent to show body background */
+            overflow: hidden;
+            /* Removed backgroundShift animation */
+        }
+
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6); /* White particles for contrast against image */
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        .hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.15); /* Glass background */
+            backdrop-filter: blur(10px); /* Glass blur */
+            border: 1px solid rgba(0, 0, 0, 0.2); /* Darker border for glass */
+            color: black; /* All text black */
+            padding: 15px 20px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 18px;
+            z-index: 1000;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); /* Glass shadow */
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .hud-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hud-icon {
+            font-size: 20px;
+            color: black; /* Ensure icons are black */
+        }
+
+        .hud-button {
+            background: linear-gradient(45deg, #F42A41, #FF6B6B); /* Red button */
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            margin-top: 10px;
+        }
+
+        .hud-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .player {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px; /* Original width for image */
+            height: 90px; /* Original height for image */
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/5/5d/Mirza_Fakhrul_Islam_Alamgir_2023_%28cropped%29.jpg');
+            background-size: cover;
+            background-position: center;
+            border-radius: 15px; /* Original border radius */
+            border: 4px solid #F42A41; /* Red border */
+            z-index: 100;
+            box-shadow: 0 0 25px rgba(244, 42, 65, 0.8);
+            animation: playerGlow 2s infinite alternate;
+            transition: transform 0.1s ease-out, box-shadow 0.2s ease-out; /* Smooth movement and hit feedback */
+        }
+
+        .player::before {
+            content: none; /* Remove rocket emoji */
+        }
+
+        @keyframes playerGlow {
+            0% { box-shadow: 0 0 25px rgba(244, 42, 65, 0.8); }
+            100% { box-shadow: 0 0 40px rgba(244, 42, 65, 1); }
+        }
+
+        .player.player-hit {
+            animation: playerHitFlash 0.3s ease-out; /* Flash animation on hit */
+            outline: none; /* Remove outline, rely on box-shadow */
+            box-shadow: 0 0 50px rgba(255, 0, 0, 1); /* Intense red glow on hit */
+        }
+
+        @keyframes playerHitFlash {
+            0% { filter: brightness(2) saturate(2); }
+            50% { filter: brightness(1) saturate(1); }
+            100% { filter: brightness(2) saturate(2); }
+        }
+
+        .player::after {
+            content: 'মির্জা ফখরুল';
+            position: absolute;
+            bottom: -20px; /* Adjusted position */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: bold;
+            color: black; /* All text black */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 0.7); /* Semi-transparent white background for readability */
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .bullet {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%; /* Default to circle, can be overridden by specific types */
+            z-index: 50;
+            animation: bulletPulse 0.3s infinite, bulletGlow 0.8s infinite alternate;
+            border: 2px solid; /* Border color will be set by JS */
+            box-shadow: 0 0 15px; /* Shadow color will be set by JS */
+        }
+
+        .bullet .bullet-icon {
+            font-size: 25px; /* Default icon size */
+            animation: spin 1s infinite linear;
+        }
+
+        /* Specific bullet types */
+        .bullet.poster {
+            width: 40px;
+            height: 50px;
+            border-radius: 5px; /* Rectangular for poster */
+            background: linear-gradient(45deg, #F42A41, #FF6B6B); /* Red */
+            border-color: #006A4E; /* Green border */
+            box-shadow: 0 0 15px rgba(244, 42, 65, 0.8);
+        }
+        .bullet.poster .bullet-icon {
+            font-size: 30px;
+        }
+
+        .bullet.voting-machine {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%; /* Circle for voting machine */
+            background: linear-gradient(45deg, #006A4E, #3CB371); /* Green */
+            border-color: #F42A41; /* Red border */
+            box-shadow: 0 0 15px rgba(0, 106, 78, 0.8);
+        }
+        .bullet.voting-machine .bullet-icon {
+            font-size: 25px;
+        }
+
+        .bullet.microphone {
+            width: 30px;
+            height: 45px;
+            border-radius: 10px; /* Rounded rectangle for microphone */
+            background: linear-gradient(45deg, #F42A41, #FF6B6B); /* Red */
+            border-color: #006A4E; /* Green border */
+            box-shadow: 0 0 15px rgba(244, 42, 65, 0.8);
+        }
+        .bullet.microphone .bullet-icon {
+            font-size: 28px;
+        }
+
+
+        @keyframes bulletPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes bulletGlow {
+            0% { box-shadow: 0 0 15px rgba(244, 42, 65, 0.8); }
+            100% { box-shadow: 0 0 30px rgba(255, 0, 0, 1); }
+        }
+
+        .enemy {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            border: 3px solid #006A4E; /* Green border */
+            z-index: 50;
+            animation: enemyFloat 2s infinite;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 25px;
+            transition: background-color 0.1s ease-out, box-shadow 0.1s ease-out; /* Added transition for hit feedback */
+        }
+
+        .enemy.hit {
+            background-color: rgba(0, 0, 0, 0.5) !important; /* Flash black on hit */
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.8), 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .enemy .enemy-icon {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 25px;
+        }
+
+        .enemy .enemy-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 6px;
+            border-radius: 8px;
+            white-space: nowrap;
+            color: black; /* All text black */
+        }
+
+        .enemy.logic { background: linear-gradient(45deg, #006A4E, #3CB371); } /* Green shades */
+        .enemy.common-sense { background: linear-gradient(45deg, #F42A41, #FF6B6B); } /* Red shades */
+        .enemy.emergency { background: linear-gradient(45deg, #006A4E, #3CB371); } /* Green shades */
+        .enemy.infrastructure { background: linear-gradient(45deg, #F42A41, #FF6B6B); } /* Red shades */
+        .enemy.riot { background: linear-gradient(45deg, #F42A41, #FF6B6B); } /* Red shades */
+        .enemy.fake-news { background: linear-gradient(45deg, #006A4E, #3CB371); } /* Green shades */
+        .enemy.economy { background: linear-gradient(45deg, #F42A41, #FF6B6B); } /* Red shades */
+
+        .enemy.genz-bomb {
+            background: linear-gradient(45deg, #F42A41, #B22222); /* Darker Red for GenZ bomb */
+            border: 3px solid #006A4E; /* Green border */
+            animation: genzBombPulse 0.5s infinite, enemyFloat 2s infinite;
+            box-shadow: 0 0 30px rgba(244, 42, 65, 0.9);
+        }
+        .enemy.genz-bomb .enemy-icon { animation: spin 1s infinite; }
+        .enemy.genz-bomb .enemy-label { color: black; } /* Black label */
+
+
+        .boss {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 20px;
+            border: 5px solid #F42A41; /* Red border */
+            z-index: 60;
+            animation: bossFloat 3s infinite alternate;
+            box-shadow: 0 0 40px rgba(244, 42, 65, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 60px;
+            color: black; /* Boss emoji/text black */
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            flex-direction: column;
+            transition: background-color 0.1s ease-out, box-shadow 0.1s ease-out; /* Added transition for hit feedback */
+            overflow: hidden; /* Ensure image stays within bounds */
+        }
+
+        .boss.hit {
+            background-color: rgba(0, 0, 0, 0.5) !important; /* Flash black on hit */
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(244, 42, 65, 0.7);
+        }
+
+        .boss-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Cover the boss area */
+            border-radius: 15px; /* Match boss border-radius */
+        }
+
+        .boss-name {
+            position: absolute;
+            bottom: -30px;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            color: black; /* All text black */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 0.7); /* Semi-transparent background for readability */
+            padding: 5px 10px;
+            border-radius: 10px;
+            white-space: nowrap;
+        }
+
+        .boss-health-bar {
+            position: absolute;
+            bottom: -50px; /* Adjusted position below name */
+            width: 100%;
+            height: 10px;
+            background-color: #F42A41; /* Red */
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid #B22222; /* Darker Red */
+        }
+
+        .boss-health-fill {
+            height: 100%;
+            background-color: #006A4E; /* Green */
+            width: 100%; /* Will be updated by JS */
+            transition: width 0.1s linear;
+        }
+
+        @keyframes enemyFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes genzBombPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes bossFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .explosion {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #F42A41 0%, #FF6B6B 100%); /* Red hues only */
+            border-radius: 50%;
+            animation: explode 0.8s ease-out forwards;
+            z-index: 200;
+            box-shadow: 0 0 50px rgba(244, 42, 65, 0.8), 0 0 80px rgba(255, 107, 107, 0.5); /* Red hues for glow */
+        }
+
+        .explosion::before {
+            content: '💥';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 40px;
+            animation: explodeIcon 0.8s ease-out forwards;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(0); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.8; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        @keyframes explodeIcon {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -50%) scale(0); }
+        }
+
+        .powerup {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, #006A4E, #3CB371); /* Green */
+            border-radius: 50%;
+            border: 4px solid #F42A41; /* Red border */
+            animation: powerupFloat 1s infinite, powerupGlow 1.5s infinite alternate; /* Added glow */
+            z-index: 75;
+            box-shadow: 0 0 25px rgba(0, 106, 78, 0.8);
+        }
+
+        .powerup::before {
+            content: '🎤';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 25px;
+            animation: powerupSpin 2s infinite;
+        }
+
+        @keyframes powerupFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes powerupSpin {
+            0% { transform: translateX(-50%) rotate(0deg); }
+            100% { transform: translateX(-50%) rotate(360deg); }
+        }
+
+        @keyframes powerupGlow {
+            0% { box-shadow: 0 0 25px rgba(0, 106, 78, 0.8); }
+            100% { box-shadow: 0 0 40px rgba(0, 200, 100, 1); }
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8); /* Darker, more opaque background for message box */
+            backdrop-filter: blur(8px); /* Slightly less blur for clarity */
+            border: 2px solid #006A4E; /* Green border for messages */
+            color: white; /* White text for better contrast on dark background */
+            padding: 40px; /* Slightly reduced padding */
+            border-radius: 20px; /* Slightly smaller border radius */
+            text-align: center;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.5); /* Stronger shadow */
+            display: flex; /* Ensure flex for centering content */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .game-over h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #F42A41; /* Red for emphasis */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+
+        .game-over p {
+            color: white; /* Ensure paragraph text is white */
+            margin-bottom: 15px;
+        }
+
+        .game-over button {
+            margin-top: 20px;
+        }
+
+        .game-over-image {
+            max-width: 80%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 3px solid #F42A41; /* Red border for the image */
+            box-shadow: 0 0 20px rgba(244, 42, 65, 0.7);
+        }
+
+        .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.15); /* Glass background */
+            backdrop-filter: blur(10px); /* Glass blur */
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: black; /* All text black */
+            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 20px 40px 0 rgba(0, 0, 0, 0.37); /* Glass shadow */
+        }
+
+        /* Removed gradientShift animation for start-screen */
+
+        .start-screen h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+            animation: titleGlow 3s infinite alternate;
+        }
+
+        .start-screen h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #006A4E; /* Green */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+
+        .start-screen p {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            max-width: 700px;
+            line-height: 1.6;
+        }
+
+        .start-btn {
+            padding: 18px 40px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #F42A41, #FF6B6B); /* Red button */
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(244, 42, 65, 0.4);
+            font-family: 'Noto Sans Bengali', Arial, sans-serif;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(244, 42, 65, 0.6);
+        }
+
+        .speech-bubble {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8); /* Darker semi-transparent for text */
+            color: white; /* White text on dark bubble */
+            padding: 12px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            animation: fadeOut 4s forwards;
+            z-index: 150;
+            border: 2px solid #006A4E; /* Green border */
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            max-width: 200px;
+            text-align: center;
+        }
+
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 30px;
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 12px solid rgba(0, 0, 0, 0.8); /* Match bubble background */
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: translateY(0px); }
+            70% { opacity: 1; transform: translateY(-10px); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+
+        .mega-blast {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, #F42A41, #FF6B6B); /* Red hues */
+            border-radius: 50%;
+            animation: megaBlast 1.5s ease-out forwards;
+            z-index: 200;
+            box-shadow: 0 0 100px rgba(244, 42, 65, 0.8);
+        }
+
+        .mega-blast::before {
+            content: '🎆';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            animation: megaBlastIcon 1.5s ease-out forwards;
+        }
+
+        @keyframes megaBlast {
+            0% { transform: scale(0); opacity: 1; }
+            50% { transform: scale(5); opacity: 0.8; }
+            100% { transform: scale(15); opacity: 0; }
+        }
+
+        @keyframes megaBlastIcon {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); }
+            50% { transform: translate(-50%, -50%) scale(1.5) rotate(180deg); }
+            100% { transform: translate(-50%, -50%) scale(0) rotate(360deg); }
+        }
+
+        @keyframes titleGlow {
+            0% { text-shadow: 4px 4px 8px rgba(0,0,0,0.5); }
+            100% { text-shadow: 4px 4px 30px rgba(0,0,0,0.8); } /* Black glow for text */
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.15); /* Glass background */
+            backdrop-filter: blur(10px); /* Glass blur */
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            color: black; /* All text black */
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            z-index: 1000;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); /* Glass shadow */
+        }
+
+        .mobile-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            gap: 20px;
+            z-index: 1000;
+        }
+
+        .mobile-btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.2); /* Semi-transparent black */
+            border: 2px solid rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            color: white; /* White icons on dark buttons */
+            font-size: 24px;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-btn:active {
+            transform: scale(0.95);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .countdown-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #F42A41; /* Red countdown */
+            font-size: 10rem;
+            font-weight: bold;
+            z-index: 1001;
+            display: none; /* Hidden by default */
+        }
+
+        .pause-menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.15); /* Glass background */
+            backdrop-filter: blur(10px); /* Glass blur */
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            color: black; /* All text black */
+            padding: 50px;
+            border-radius: 25px;
+            text-align: center;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 20px 40px 0 rgba(0, 0, 0, 0.37); /* Glass shadow */
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .pause-menu h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #006A4E; /* Green */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+
+        /* New style for damage indicator */
+        .damage-indicator {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: #F42A41; /* Red color for damage */
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+            z-index: 250;
+            animation: floatUpFadeOut 1s ease-out forwards;
+            pointer-events: none; /* Ensure it doesn't block clicks */
+            white-space: nowrap;
+        }
+
+        @keyframes floatUpFadeOut {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-50px); opacity: 0; }
+        }
+
+
+        @media (max-width: 768px) {
+            .mobile-controls {
+                display: flex;
+            }
+            
+            .controls {
+                display: none;
+            }
+            
+            .start-screen h1 {
+                font-size: 2.5rem;
+            }
+            
+            .start-screen h2 {
+                font-size: 1.5rem;
+            }
+            
+            .start-screen p {
+                font-size: 1.1rem;
+            }
+
+            .countdown-overlay {
+                font-size: 6rem;
+            }
+
+            .pause-menu {
+                padding: 30px;
+            }
+
+            .pause-menu h2 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="particles" id="particles"></div>
+        
+        <div class="start-screen" id="startScreen">
+            <h1>🗳️ নির্বাচন ব্লাস্টার 🗳️</h1>
+            <h2>মির্জা ফখরুলের চূড়ান্ত সমাধান!</h2>
+            <p><strong>যখন বিশৃঙ্খলা দেখা দেয়, তখন একটিই অস্ত্র... ব্যালট ব্লাস্টার!</strong></p>
+            <p>🎮 তীর চিহ্ন দিয়ে চলুন, স্পেসবার দিয়ে সমস্যার উপর ভোট নিক্ষেপ করুন!</p>
+            <p><strong>⚠️ সতর্কতা:</strong> জেনজেড বোমা (💣) এ গুলি করবেন না - তাৎক্ষণিক গেম ওভার!</p>
+            <p><strong>মনে রাখবেন: শুধু নির্বাচনই আমাদের রক্ষা করতে পারে!</strong></p>
+            <button class="start-btn" onclick="startGame()">গণতন্ত্র শুরু করুন!</button>
+        </div>
+
+        <div class="hud">
+            <div class="hud-item">
+                <span class="hud-icon">🎯</span>
+                <span>স্কোর: <span id="score">০</span></span>
+            </div>
+            <div class="hud-item">
+                <span class="hud-icon">⭐</span>
+                <span>লেভেল: <span id="level">১</span></span>
+            </div>
+            <div class="hud-item">
+                <span class="hud-icon">❤️</span>
+                <span>জীবন: <span id="lives">৩</span></span>
+            </div>
+            <div class="hud-item">
+                <span class="hud-icon">🗳️</span>
+                <span>গোলা: <span id="ammo">∞</span></span>
+            </div>
+            <button class="hud-button" onclick="pauseGame()">বিরতি</button>
+        </div>
+
+        <div class="player" id="player"></div>
+
+        <div class="controls">
+            <div>🎮 নিয়ন্ত্রণ:</div>
+            <div>⬅️➡️⬆️⬇️ চলাচল</div>
+            <div>স্পেসবার = গুলি</div>
+        </div>
+
+        <div class="mobile-controls">
+            <button class="mobile-btn" id="leftBtn">⬅️</button>
+            <button class="mobile-btn" id="rightBtn">➡️</button>
+            <button class="mobile-btn" id="shootBtn">🗳️</button>
+        </div>
+
+        <div class="countdown-overlay" id="countdownOverlay"></div>
+
+        <div class="game-over" id="gameOver">
+            <h2>গণতন্ত্র পরাজিত!</h2>
+            <img src="https://placehold.co/400x300/F42A41/000000?text=GAME+OVER" alt="মির্জা ফখরুল পরাজিত" class="game-over-image">
+            <p>মির্জা ফখরুলের নির্বাচনী সমাধান এবার যথেষ্ট ছিল না!</p>
+            <p>চূড়ান্ত স্কোর: <span id="finalScore">০</span></p>
+            <button class="start-btn" onclick="restartGame()">আবার চেষ্টা করুন!</button>
+        </div>
+
+        <div class="pause-menu" id="pauseMenu">
+            <h2>খেলা বিরতি</h2>
+            <button class="start-btn" onclick="resumeGame()">খেলা শুরু করুন</button>
+            <button class="start-btn" onclick="restartGame()">নতুন খেলা শুরু করুন</button>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            isPlaying: false,
+            score: 0,
+            level: 1,
+            lives: 3,
+            playerX: window.innerWidth / 2,
+            playerY: window.innerHeight - 140,
+            bullets: [],
+            enemies: [],
+            powerups: [],
+            explosions: [],
+            speechBubbles: [],
+            lastEnemySpawn: 0,
+            lastPowerupSpawn: 0,
+            enemySpawnRate: 2000,
+            powerupActive: false,
+            powerupTimer: 0,
+            playerSpeed: 7, // Speed for player movement
+            shootingInterval: 200, // Milliseconds between shots
+            lastShotTime: 0,
+            keys: { left: false, right: false, up: false, down: false, space: false },
+            boss: null, // New boss object
+            bossActive: false,
+            bossLevelInterval: 2 // Boss every 2 levels now
+        };
+
+        const enemyTypes = [
+            { type: 'logic', text: 'আমাদের ভাল রাস্তা দরকার!', emoji: '🤔', label: 'যুক্তি', color: '#006A4E', health: 10 }, /* Green */
+            { type: 'common-sense', text: 'বাজেট কোথায়?', emoji: '💡', label: 'সাধারণ জ্ঞান', color: '#F42A41', health: 15 }, /* Red */
+            { type: 'emergency', text: 'আগে সমস্যা সমাধান করি!', emoji: '🚨', label: 'জরুরী সেবা', color: '#006A4E', health: 12 }, /* Green */
+            { type: 'infrastructure', text: 'এটার পরিকল্পনা দরকার!', emoji: '🏗️', label: 'অবকাঠামো', color: '#F42A41', health: 20 }, /* Red */
+            { type: 'riot', text: 'জ্যামে আটকা!', emoji: '😠', label: 'দাঙ্গা', color: '#F42A41', health: 18 }, /* New, Red */
+            { type: 'fake-news', text: 'সব মিথ্যা খবর!', emoji: '📰', label: 'ভুয়া খবর', color: '#006A4E', health: 14 }, /* New, Green */
+            { type: 'economy', text: 'বাজার আগুন!', emoji: '💸', label: 'অর্থনীতি', color: '#F42A41', health: 22 }, /* New, Red */
+            { type: 'genz-bomb', text: 'ওকে বুমার!', emoji: '💣', label: 'জেনজেড বোমা', color: '#F42A41', dangerous: true, health: 1 } // Red for GenZ bomb
+        ];
+
+        const bossDefinitions = [
+            { 
+                name: "প্রফেসর ইউনূস", 
+                imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/61/Chief_Adviser_of_the_People%E2%80%99s_Republic_of_Bangladesh%2C_Mr._Muhammad_Yunus_at_Bangkok%2C_in_Thailand_on_April_04%2C_2025_%282%29_%28cropped%29.jpg', 
+                healthMultiplier: 4, // Changed from 7 to 4 for easier defeat at early levels
+                speed: 0.8, 
+                color: '#006A4E', /* Green */
+                challenge: "wisdom" // Example challenge
+            },
+            { 
+                name: "পিনাকী ভট্টাচার্য", 
+                imageUrl: 'https://scontent.fdac138-1.fna.fbcdn.net/v/t39.30808-6/495584777_122163503042497147_2883324992224628877_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=127cfc&_nc_ohc=CIBK7_at1PIQ7kNvwEkjo_N&_nc_oc=AdnKD1aCubkDvWv6HO1xYm7prLz_Y5gQqldUWff9elIb9nor41W2ScNdkqCXxnzoXdE&_nc_zt=23&_nc_ht=scontent.fdac138-1.fna&_nc_gid=p4pqTrhFNEa77FUkPfphrg&oh=00_AfRa4cyOjAc2jAFDTtVQ8yT4mysJngSvhjCUHbd_FJmaGA&oe=687AC453', 
+                healthMultiplier: 10, // Increased health for a new challenge
+                speed: 1.0, 
+                color: '#F42A41', /* Red color for this boss */
+                challenge: "propaganda" // A new challenge type for flavor
+            },
+            { name: "কমন সেন্স দৈত্য", emoji: "🧠", healthMultiplier: 5, speed: 1, color: '#F42A41' }, /* Red */
+            { name: "নীতি বিশেষজ্ঞ হাইড্রো", emoji: "📜", healthMultiplier: 15, speed: 1.2, color: '#006A4E', challenge: "shooting" }, /* Green */
+            { name: "সংবিধান ভূত", emoji: "👻", healthMultiplier: 10, speed: 1.5, color: '#F42A41' } /* Red */
+        ];
+
+        const playerQuotes = [
+            "শুধু নির্বাচনই আমাদের রক্ষা করতে পারে!",
+            "গণতন্ত্র সবার আগে!",
+            "এখন ভোট দিন, পরে চিন্তা করবেন!",
+            "নির্বাচনই সমাধান!",
+            "ব্যালট শক্তি সক্রিয়!",
+            "গণতন্ত্রের জয়!",
+            "নির্বাচনী বিপ্লব!",
+            "ভোটের অধিকার, আমার অহংকার!",
+            "ব্যালট বাক্সই আমার অস্ত্র!",
+            "ফখরুল আছেন, চিন্তা কিসের?",
+            "যুক্তি নয়, ভোট চাই!",
+            "আমার ভোট, আমার দেশ!"
+        ];
+
+        const bulletTypes = [
+            { type: 'poster', emoji: '📢', width: 40, height: 50, color: '#F42A41', borderColor: '#006A4E', borderRadius: '5px' }, /* Red poster, Green border */
+            { type: 'voting-machine', emoji: '🗳️', width: 35, height: 35, color: '#006A4E', borderColor: '#F42A41', borderRadius: '50%' }, /* Green machine, Red border */
+            { type: 'microphone', emoji: '🎤', width: 30, height: 45, color: '#F42A41', borderColor: '#006A4E', borderRadius: '10px' } /* Red mic, Green border */
+        ];
+
+        const banglaNumbers = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+
+        function toBanglaNumber(num) {
+            return num.toString().split('').map(digit => banglaNumbers[parseInt(digit)]).join('');
+        }
+
+        function createParticles() {
+            const particles = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particles.appendChild(particle);
+            }
+        }
+
+        // Gemini API configuration
+        const apiKey = ""; // Canvas will provide this at runtime
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+        /**
+         * Calls the Gemini API to generate text.
+         * @param {string} prompt - The prompt for the LLM.
+         * @returns {Promise<string>} - A promise that resolves with the generated text.
+         */
+        async function generateTextWithGemini(prompt) {
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    return result.candidates[0].content.parts[0].text;
+                } else {
+                    console.error("Gemini API response structure unexpected:", result);
+                    return "একটি নতুন হাস্যকর চ্যালেঞ্জ অপেক্ষা করছে!"; // Fallback message in Bangla
+                }
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                return "একটি নতুন হাস্যকর চ্যালেঞ্জ অপেক্ষা করছে!"; // Fallback message in Bangla
+            }
+        }
+
+        /**
+         * Displays a message in a custom modal box.
+         * @param {string} message - The message to display.
+         * @param {function} onOkCallback - Callback function when OK is clicked.
+         */
+        function showMessageBox(message, onOkCallback) {
+            const messageBox = document.createElement('div');
+            messageBox.className = 'game-over'; // Reusing game-over style for message box
+            messageBox.id = 'tempMessageBox';
+            messageBox.innerHTML = `<h2>${message}</h2><button class="start-btn">ঠিক আছে!</button>`;
+            document.body.appendChild(messageBox);
+            messageBox.style.display = 'flex';
+
+            messageBox.querySelector('.start-btn').onclick = () => {
+                messageBox.remove();
+                if (onOkCallback) onOkCallback();
+            };
+        }
+
+        /**
+         * Shows the crisis briefing by generating text from Gemini API.
+         * @param {function} callback - Callback to execute after briefing is dismissed.
+         */
+        async function showCrisisBriefing(callback) {
+            const crisisPrompt = `নির্বাচন ব্লাস্টার খেলার জন্য একটি সংক্ষিপ্ত, হাস্যকর এবং ব্যঙ্গাত্মক জাতীয় সংকটের বর্ণনা দিন যা কেবল নির্বাচনের মাধ্যমেই সমাধান করা যেতে পারে। বাংলাদেশের প্রেক্ষাপট মাথায় রাখুন। ৫০ শব্দের মধ্যে রাখুন।`;
+            const crisisText = await generateTextWithGemini(crisisPrompt);
+            showMessageBox(`✨ জাতীয় সংকট ব্রিফিং: ${crisisText}`, callback);
+        }
+
+        /**
+         * Shows Mr. Fokrul's wisdom by generating text from Gemini API.
+         * @param {function} callback - Callback to execute after wisdom is dismissed.
+         */
+        async function showFokrulWisdom(callback) {
+            const wisdomPrompt = `মির্জা ফখরুল নির্বাচন ব্লাস্টার গেমে নির্বাচন দিয়ে একটি জাতীয় সংকট সমাধান করেছেন। তার সাফল্য সম্পর্কে একটি সংক্ষিপ্ত, হাস্যকর এবং ব্যঙ্গাত্মক 'ফখরুলের জ্ঞান' বা 'সংবাদ শিরোনাম' তৈরি করুন। বাংলাদেশের রাজনৈতিক পরিস্থিতিকে ব্যঙ্গ করে লিখুন। ৩০ শব্দের মধ্যে রাখুন।`;
+            const wisdomText = await generateTextWithGemini(wisdomPrompt);
+            showMessageBox(`✨ মির্জা ফখরুলের জ্ঞান: ${wisdomText}`, callback);
+        }
+
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            createParticles();
+            startCountdown(); // Start countdown
+        }
+
+        function startCountdown() {
+            const countdownOverlay = document.getElementById('countdownOverlay');
+            countdownOverlay.style.display = 'flex';
+            let count = 3;
+            countdownOverlay.textContent = count;
+
+            // Pre-fetch the initial crisis briefing while countdown runs
+            const initialBriefingPrompt = `নির্বাচন ব্লাস্টার খেলার জন্য একটি সংক্ষিপ্ত, হাস্যকর এবং ব্যঙ্গাত্মক জাতীয় সংকটের বর্ণনা দিন যা কেবল নির্বাচনের মাধ্যমেই সমাধান করা যেতে পারে। বাংলাদেশের প্রেক্ষাপট মাথায় রাখুন। ৫০ শব্দের মধ্যে রাখুন।`;
+            const initialBriefingPromise = generateTextWithGemini(initialBriefingPrompt);
+
+            const countdownInterval = setInterval(async () => {
+                count--;
+                if (count > 0) {
+                    countdownOverlay.textContent = count;
+                } else if (count === 0) {
+                    countdownOverlay.textContent = 'শুরু করুন!';
+                } else {
+                    clearInterval(countdownInterval);
+                    countdownOverlay.style.display = 'none';
+                    
+                    // Wait for the pre-fetched briefing and then display it
+                    const crisisText = await initialBriefingPromise;
+                    showMessageBox(`✨ জাতীয় সংকট ব্রিফিং: ${crisisText}`, () => {
+                        gameState.isPlaying = true; // Start game after briefing is dismissed
+                        gameLoop();
+                    });
+                }
+            }, 1000);
+        }
+
+        function pauseGame() {
+            gameState.isPlaying = false;
+            document.getElementById('pauseMenu').style.display = 'flex';
+        }
+
+        function resumeGame() {
+            document.getElementById('pauseMenu').style.display = 'none';
+            gameState.isPlaying = true;
+            gameLoop();
+        }
+
+        function restartGame() {
+            // Clear all existing game elements from the DOM
+            document.querySelectorAll('.bullet, .enemy, .powerup, .explosion, .speech-bubble, #tempMessageBox, .boss, .damage-indicator').forEach(el => el.remove());
+            document.getElementById('particles').innerHTML = ''; // Clear particles
+
+            // Reset game state to initial values
+            gameState = {
+                isPlaying: false,
+                score: 0,
+                level: 1,
+                lives: 3,
+                playerX: window.innerWidth / 2,
+                playerY: window.innerHeight - 140,
+                bullets: [],
+                enemies: [],
+                powerups: [],
+                explosions: [],
+                speechBubbles: [],
+                lastEnemySpawn: 0,
+                lastPowerupSpawn: 0,
+                enemySpawnRate: 2000,
+                powerupActive: false,
+                powerupTimer: 0,
+                playerSpeed: 7,
+                shootingInterval: 200,
+                lastShotTime: 0,
+                keys: { left: false, right: false, up: false, down: false, space: false },
+                boss: null,
+                bossActive: false,
+                bossLevelInterval: 2 // Boss every 2 levels now
+            };
+            
+            // Hide all game-related overlays
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('pauseMenu').style.display = 'none';
+            document.getElementById('countdownOverlay').style.display = 'none';
+
+            // Show the start screen to begin a new game cycle
+            document.getElementById('startScreen').style.display = 'flex';
+            
+            updateHUD(); // Update HUD with reset values
+        }
+
+        function updateHUD() {
+            document.getElementById('score').textContent = toBanglaNumber(gameState.score);
+            document.getElementById('level').textContent = toBanglaNumber(gameState.level);
+            document.getElementById('lives').textContent = toBanglaNumber(gameState.lives);
+        }
+
+        function createBullet() {
+            const playerElement = document.getElementById('player');
+            const playerRect = playerElement.getBoundingClientRect();
+            
+            const bulletType = bulletTypes[Math.floor(Math.random() * bulletTypes.length)];
+
+            const bullet = document.createElement('div');
+            bullet.className = `bullet ${bulletType.type}`;
+            bullet.style.width = `${bulletType.width}px`;
+            bullet.style.height = `${bulletType.height}px`;
+            bullet.style.left = (playerRect.left + playerRect.width / 2 - bulletType.width / 2) + 'px';
+            bullet.style.top = (playerRect.top - bulletType.height) + 'px'; // Start above player
+            bullet.style.borderColor = bulletType.borderColor;
+            bullet.style.boxShadow = `0 0 15px ${bulletType.color}`;
+
+            const bulletIcon = document.createElement('span');
+            bulletIcon.className = 'bullet-icon';
+            bulletIcon.textContent = bulletType.emoji;
+            bullet.appendChild(bulletIcon);
+
+            document.querySelector('.game-container').appendChild(bullet);
+            
+            gameState.bullets.push({
+                element: bullet,
+                x: parseInt(bullet.style.left),
+                y: parseInt(bullet.style.top),
+                width: bulletType.width,
+                height: bulletType.height,
+                speed: 10
+            });
+            gameState.lastShotTime = Date.now();
+        }
+
+        function createEnemy() {
+            const enemyType = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+            const enemy = document.createElement('div');
+            enemy.className = `enemy ${enemyType.type}`;
+            enemy.style.left = Math.random() * (window.innerWidth - 60) + 'px';
+            enemy.style.top = '-60px';
+            enemy.style.backgroundColor = enemyType.color; /* Apply specific color */
+
+            const enemyIcon = document.createElement('span');
+            enemyIcon.className = 'enemy-icon';
+            enemyIcon.textContent = enemyType.emoji;
+            enemy.appendChild(enemyIcon);
+
+            const enemyLabel = document.createElement('span');
+            enemyLabel.className = 'enemy-label';
+            enemyLabel.textContent = enemyType.label;
+            enemyLabel.style.color = 'black'; /* Ensure label text is black */
+            enemy.appendChild(enemyLabel);
+
+            document.querySelector('.game-container').appendChild(enemy);
+            
+            gameState.enemies.push({
+                element: enemy,
+                x: parseInt(enemy.style.left),
+                y: -60,
+                width: 60, // Fixed enemy width
+                height: 60, // Fixed enemy height
+                speed: enemyType.type === 'genz-bomb' ? 0.8 : (1.5 + Math.random() * 2) * (1 + gameState.level * 0.1), // Speed increases with level
+                type: enemyType.type,
+                text: enemyType.text,
+                dangerous: enemyType.dangerous || false,
+                health: enemyType.health * (1 + gameState.level * 0.2) // Health increases with level
+            });
+        }
+
+        function createPowerup() {
+            const powerup = document.createElement('div');
+            powerup.className = 'powerup';
+            powerup.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+            powerup.style.top = '-50px';
+            document.querySelector('.game-container').appendChild(powerup);
+            
+            gameState.powerups.push({
+                element: powerup,
+                x: parseInt(powerup.style.left),
+                y: -50,
+                width: 50,
+                height: 50,
+                speed: 2.5
+            });
+        }
+
+        function createExplosion(x, y) {
+            const explosion = document.createElement('div');
+            explosion.className = 'explosion';
+            explosion.style.left = (x - 50) + 'px';
+            explosion.style.top = (y - 50) + 'px';
+            document.querySelector('.game-container').appendChild(explosion);
+            
+            gameState.explosions.push({ element: explosion, timer: Date.now() });
+
+            // Remove explosion after animation
+            setTimeout(() => {
+                explosion.remove();
+                gameState.explosions = gameState.explosions.filter(e => e.element !== explosion);
+            }, 800);
+        }
+
+        function createDamageIndicator(x, y, damage) {
+            const indicator = document.createElement('div');
+            indicator.className = 'damage-indicator';
+            indicator.textContent = `-${toBanglaNumber(damage)}`;
+            indicator.style.left = x + 'px';
+            indicator.style.top = y + 'px';
+            document.querySelector('.game-container').appendChild(indicator);
+
+            // Remove indicator after animation
+            setTimeout(() => {
+                indicator.remove();
+            }, 1000); // Matches floatUpFadeOut animation duration
+        }
+
+
+        function createSpeechBubble(x, y, text) {
+            const bubble = document.createElement('div');
+            bubble.className = 'speech-bubble';
+            bubble.textContent = text;
+            bubble.style.left = x + 'px';
+            bubble.style.top = y + 'px';
+            document.querySelector('.game-container').appendChild(bubble);
+
+            gameState.speechBubbles.push({ element: bubble, timer: Date.now() });
+
+            // Remove speech bubble after animation
+            setTimeout(() => {
+                bubble.remove();
+                gameState.speechBubbles = gameState.speechBubbles.filter(b => b.element !== bubble);
+            }, 4000);
+        }
+
+        function createBoss() {
+            const bossDef = bossDefinitions[(gameState.level / gameState.bossLevelInterval - 1) % bossDefinitions.length];
+            
+            const bossElement = document.createElement('div');
+            bossElement.className = 'boss';
+            bossElement.style.left = (window.innerWidth / 2 - 75) + 'px';
+            bossElement.style.top = '-150px'; // Start above screen
+            bossElement.style.backgroundColor = bossDef.color;
+
+            if (bossDef.imageUrl) {
+                const bossImage = document.createElement('img');
+                bossImage.src = bossDef.imageUrl;
+                bossImage.className = 'boss-image';
+                bossImage.alt = bossDef.name;
+                // Fallback image in case the URL fails
+                bossImage.onerror = `this.onerror=null;this.src='https://placehold.co/150x150/F42A41/000000?text=${bossDef.name.substring(0, 1)}'`; // Black text on red fallback
+                bossElement.appendChild(bossImage);
+            } else {
+                const bossEmoji = document.createElement('span');
+                bossEmoji.textContent = bossDef.emoji;
+                bossElement.appendChild(bossEmoji);
+            }
+
+            const bossName = document.createElement('div');
+            bossName.className = 'boss-name';
+            bossName.textContent = bossDef.name;
+            bossElement.appendChild(bossName);
+
+            const bossHealthBar = document.createElement('div');
+            bossHealthBar.className = 'boss-health-bar';
+            const bossHealthFill = document.createElement('div');
+            bossHealthFill.className = 'boss-health-fill';
+            bossHealthBar.appendChild(bossHealthFill);
+            bossElement.appendChild(bossHealthBar);
+
+            document.querySelector('.game-container').appendChild(bossElement);
+
+            gameState.boss = {
+                element: bossElement,
+                x: parseInt(bossElement.style.left),
+                y: parseInt(bossElement.style.top),
+                width: 150,
+                height: 150,
+                name: bossDef.name,
+                emoji: bossDef.emoji,
+                health: bossDef.healthMultiplier * 50 * gameState.level, // Boss health scales with level
+                maxHealth: bossDef.healthMultiplier * 50 * gameState.level,
+                speed: bossDef.speed,
+                color: bossDef.color,
+                challenge: bossDef.challenge || null
+            };
+            gameState.bossActive = true;
+            gameState.enemies.forEach(enemy => enemy.element.remove());
+            gameState.enemies = []; // Clear regular enemies for boss fight
+
+            let message = `বস ফাইট! ${gameState.boss.name} এর জন্য প্রস্তুত হোন!`;
+            if (gameState.boss.challenge === "shooting") {
+                message = `🔫 শুটিং চ্যালেঞ্জ! ${gameState.boss.name} এর জন্য প্রস্তুত হোন! অবিরাম গুলি করুন!`;
+            }
+            showMessageBox(message, () => {
+                gameState.isPlaying = true;
+                gameLoop();
+            });
+        }
+
+        function updateGameArea() {
+            if (!gameState.isPlaying) return;
+
+            // Move player
+            const playerElement = document.getElementById('player');
+            const prevPlayerX = gameState.playerX;
+            if (gameState.keys.left) gameState.playerX -= gameState.playerSpeed;
+            if (gameState.keys.right) gameState.playerX += gameState.playerSpeed;
+            // Clamp player position
+            gameState.playerX = Math.max(35, Math.min(window.innerWidth - 35, gameState.playerX));
+            playerElement.style.left = gameState.playerX + 'px';
+
+            // Apply player tilt based on movement direction
+            if (gameState.playerX < prevPlayerX) { // Moving left
+                playerElement.style.transform = 'translateX(-50%) rotateZ(-5deg)';
+            } else if (gameState.playerX > prevPlayerX) { // Moving right
+                playerElement.style.transform = 'translateX(-50%) rotateZ(5deg)';
+            } else { // Not moving horizontally
+                playerElement.style.transform = 'translateX(-50%) rotateZ(0deg)';
+            }
+
+
+            // Shoot
+            if (gameState.keys.space && (Date.now() - gameState.lastShotTime > gameState.shootingInterval)) {
+                createBullet();
+                const randomQuote = playerQuotes[Math.floor(Math.random() * playerQuotes.length)];
+                createSpeechBubble(gameState.playerX, playerElement.getBoundingClientRect().top - 50, randomQuote); // Adjusted Y for speech bubble
+            }
+
+            // Update bullets
+            for (let i = gameState.bullets.length - 1; i >= 0; i--) {
+                const bullet = gameState.bullets[i];
+                bullet.y -= bullet.speed;
+                bullet.element.style.top = bullet.y + 'px';
+
+                if (bullet.y < -bullet.height) { // Check if entire bullet is off-screen
+                    bullet.element.remove();
+                    gameState.bullets.splice(i, 1);
+                }
+            }
+
+            // Update enemies or boss
+            const now = Date.now();
+            if (gameState.bossActive) {
+                const boss = gameState.boss;
+                boss.y += boss.speed;
+                boss.element.style.top = boss.y + 'px';
+
+                if (boss.y > window.innerHeight) {
+                    gameState.lives = 0; // Boss escaped, game over
+                    updateHUD();
+                    endGame();
+                    return;
+                }
+                // Update boss health bar
+                const healthFill = boss.element.querySelector('.boss-health-fill');
+                healthFill.style.width = `${(boss.health / boss.maxHealth) * 100}%`;
+
+            } else {
+                if (now - gameState.lastEnemySpawn > gameState.enemySpawnRate) {
+                    createEnemy();
+                    gameState.lastEnemySpawn = now;
+                }
+
+                for (let i = gameState.enemies.length - 1; i >= 0; i--) {
+                    const enemy = gameState.enemies[i];
+                    const enemyRect = enemy.element.getBoundingClientRect();
+
+                    enemy.y += enemy.speed;
+                    enemy.element.style.top = enemy.y + 'px';
+
+                    if (enemy.y > window.innerHeight) {
+                        if (!enemy.dangerous) { // Only lose life if it's not a GenZ bomb
+                            gameState.lives--;
+                            playerElement.classList.add('player-hit'); // Add hit flash
+                            setTimeout(() => playerElement.classList.remove('player-hit'), 300); // Remove after short delay
+                            updateHUD();
+                            if (gameState.lives <= 0) {
+                                endGame();
+                                return;
+                            }
+                        }
+                        enemy.element.remove();
+                        gameState.enemies.splice(i, 1);
+                    }
+                }
+            }
+
+            // Update powerups
+            if (now - gameState.lastPowerupSpawn > 15000 && Math.random() < 0.1 && !gameState.bossActive) { // Spawn powerup every 15 seconds with 10% chance, not during boss
+                createPowerup();
+                gameState.lastPowerupSpawn = now;
+            }
+
+            for (let i = gameState.powerups.length - 1; i >= 0; i--) {
+                const powerup = gameState.powerups[i];
+                const powerupRect = powerup.element.getBoundingClientRect();
+                powerup.y += powerup.speed;
+                powerup.element.style.top = powerup.y + 'px';
+
+                if (powerup.y > window.innerHeight) {
+                    powerup.element.remove();
+                    gameState.powerups.splice(i, 1);
+                }
+            }
+
+            // Collision detection
+            // Bullet-Enemy/Boss collision
+            for (let i = gameState.bullets.length - 1; i >= 0; i--) {
+                const bullet = gameState.bullets[i];
+                const bulletRect = bullet.element.getBoundingClientRect();
+
+                let hitTarget = false;
+
+                if (gameState.bossActive && gameState.boss) {
+                    const boss = gameState.boss;
+                    const bossRect = boss.element.getBoundingClientRect();
+                    if (bulletRect.left < bossRect.right &&
+                        bulletRect.right > bossRect.left &&
+                        bulletRect.top < bossRect.bottom &&
+                        bulletRect.bottom > bossRect.top) {
+                        
+                        const damageDealt = 10; // Fixed damage per bullet
+                        boss.health -= damageDealt; // Bullet damage to boss
+                        createDamageIndicator(bossRect.left + bossRect.width / 2, bossRect.top + bossRect.height / 2, damageDealt); // Show damage
+                        boss.element.classList.add('hit'); // Add hit flash to boss
+                        setTimeout(() => boss.element.classList.remove('hit'), 100);
+                        createExplosion(bullet.x, bullet.y);
+                        bullet.element.remove();
+                        gameState.bullets.splice(i, 1);
+                        hitTarget = true;
+
+                        if (boss.health <= 0) {
+                            gameState.score += 500 * gameState.level; // Bonus for boss
+                            boss.element.remove();
+                            gameState.boss = null;
+                            gameState.bossActive = false;
+                            levelUp(); // Level up after boss defeat
+                            return; // Stop further updates as game state changed
+                        }
+                    }
+                } else {
+                    for (let j = gameState.enemies.length - 1; j >= 0; j--) {
+                        const enemy = gameState.enemies[j];
+                        const enemyRect = enemy.element.getBoundingClientRect();
+
+                        if (bulletRect.left < enemyRect.right &&
+                            bulletRect.right > enemyRect.left &&
+                            bulletRect.top < enemyRect.bottom &&
+                            bulletRect.bottom > enemyRect.top) {
+                            
+                            // Collision!
+                            enemy.element.classList.add('hit'); // Add hit flash to enemy
+                            setTimeout(() => enemy.element.classList.remove('hit'), 100);
+                            createExplosion(enemy.x + enemyRect.width / 2, enemy.y + enemyRect.height / 2);
+                            bullet.element.remove();
+                            gameState.bullets.splice(i, 1);
+                            hitTarget = true;
+
+                            if (enemy.dangerous) { // Hit GenZ bomb
+                                endGame(true); // Instant game over for GenZ bomb
+                                return;
+                            }
+
+                            enemy.health -= 10; // Bullet damage
+                            if (enemy.health <= 0) {
+                                enemy.element.remove();
+                                gameState.enemies.splice(j, 1);
+                                gameState.score += 10;
+                                updateHUD();
+                            }
+                            break; // Bullet hits only one enemy
+                        }
+                    }
+                }
+                if (hitTarget) {
+                    i--; // Decrement i because an element was spliced
+                }
+            }
+
+            // Player-Powerup collision
+            const playerRect = playerElement.getBoundingClientRect();
+            for (let i = gameState.powerups.length - 1; i >= 0; i--) {
+                const powerup = gameState.powerups[i];
+                const powerupRect = powerup.element.getBoundingClientRect();
+
+                if (playerRect.left < powerupRect.right &&
+                    playerRect.right > powerupRect.left &&
+                    playerRect.top < powerupRect.bottom &&
+                    playerRect.bottom > powerupRect.top) {
+                    
+                    // Powerup collected!
+                    powerup.element.remove();
+                    gameState.powerups.splice(i, 1);
+                    gameState.score += 50; // Bonus for powerup
+                    updateHUD();
+                    // Implement powerup effect (e.g., temporary invincibility, score multiplier)
+                    createSpeechBubble(playerRect.left + playerRect.width / 2, playerRect.top - 50, "শক্তি সক্রিয়!");
+                }
+            }
+
+            // Level progression (only if no boss is active)
+            if (!gameState.bossActive && gameState.score >= gameState.level * 100) { // Score threshold for next level
+                levelUp();
+            }
+        }
+
+        async function levelUp() {
+            gameState.isPlaying = false; // Pause game for level up messages
+            
+            // Clear existing elements before new level
+            document.querySelectorAll('.enemy, .bullet, .powerup, .explosion, .speech-bubble, .boss, .damage-indicator').forEach(el => el.remove());
+            gameState.enemies = [];
+            gameState.bullets = [];
+            gameState.powerups = [];
+            gameState.explosions = [];
+            gameState.speechBubbles = [];
+            if (gameState.boss) {
+                gameState.boss.element.remove();
+                gameState.boss = null;
+            }
+
+            await showFokrulWisdom(async () => { // Show wisdom first
+                gameState.level++;
+                gameState.enemySpawnRate = Math.max(500, gameState.enemySpawnRate - 100);
+                gameState.playerSpeed = Math.min(15, gameState.playerSpeed + 0.5);
+                updateHUD();
+
+                // Check for boss level
+                if (gameState.level % gameState.bossLevelInterval === 0) {
+                    createBoss(); // Create boss, which will show its own message box and resume game
+                } else {
+                    await showCrisisBriefing(() => { // Show new crisis briefing
+                        gameState.isPlaying = true; // Resume game after briefing
+                        gameLoop();
+                    });
+                }
+            });
+        }
+
+
+        function endGame(hitGenZBomb = false) {
+            gameState.isPlaying = false;
+            document.getElementById('finalScore').textContent = toBanglaNumber(gameState.score);
+            const gameOverScreen = document.getElementById('gameOver');
+            gameOverScreen.style.display = 'flex';
+            if (hitGenZBomb) {
+                gameOverScreen.querySelector('h2').textContent = "জেনজেড বোমা আঘাত করেছে!";
+                gameOverScreen.querySelector('p').textContent = "মির্জা ফখরুলের নির্বাচনী সমাধান এবার যথেষ্ট ছিল না!";
+                // Remove the image if it was a GenZ bomb game over
+                const existingImage = gameOverScreen.querySelector('.game-over-image');
+                if (existingImage) {
+                    existingImage.remove();
+                }
+            } else {
+                gameOverScreen.querySelector('h2').textContent = "গণতন্ত্র পরাজিত!";
+                gameOverScreen.querySelector('p').textContent = "মির্জা ফখরুলের নির্বাচনী সমাধান এবার যথেষ্ট ছিল না!";
+                // Ensure the image is present for regular game over
+                let existingImage = gameOverScreen.querySelector('.game-over-image');
+                if (!existingImage) {
+                    existingImage = document.createElement('img');
+                    existingImage.className = 'game-over-image';
+                    existingImage.alt = 'মির্জা ফখরুল পরাজিত';
+                    // Insert the image after the h2 tag
+                    gameOverScreen.insertBefore(existingImage, gameOverScreen.querySelector('p'));
+                }
+                existingImage.src = "https://placehold.co/400x300/F42A41/000000?text=GAME+OVER";
+            }
+        }
+
+        function gameLoop() {
+            if (gameState.isPlaying) {
+                updateGameArea();
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') gameState.keys.left = true;
+            if (e.key === 'ArrowRight') gameState.keys.right = true;
+            if (e.key === ' ') gameState.keys.space = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft') gameState.keys.left = false;
+            if (e.key === 'ArrowRight') gameState.keys.right = false;
+            if (e.key === ' ') gameState.keys.space = false;
+        });
+
+        // Mobile Controls
+        document.getElementById('leftBtn').addEventListener('touchstart', () => gameState.keys.left = true);
+        document.getElementById('leftBtn').addEventListener('touchend', () => gameState.keys.left = false);
+        document.getElementById('rightBtn').addEventListener('touchstart', () => gameState.keys.right = true);
+        document.getElementById('rightBtn').addEventListener('touchend', () => gameState.keys.right = false);
+        document.getElementById('shootBtn').addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent scrolling on touch
+            gameState.keys.space = true;
+        });
+        document.getElementById('shootBtn').addEventListener('touchend', () => gameState.keys.space = false); 
+
+        // Initial setup
+        window.onload = () => {
+            updateHUD();
+            // The start screen handles calling startGame()
+        };
+
+    </script>
+</body>
+</html>
