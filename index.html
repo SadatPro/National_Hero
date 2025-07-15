@@ -105,7 +105,7 @@
 
         .player {
             position: absolute;
-            bottom: 50px;
+            bottom: 30px; /* Adjusted for better mobile visibility */
             left: 50%;
             transform: translateX(-50%);
             width: 70px; /* Original width for image */
@@ -447,12 +447,12 @@
             backdrop-filter: blur(8px); /* Slightly less blur for clarity */
             border: 2px solid #006A4E; /* Green border for messages */
             color: white; /* White text for better contrast on dark background */
-            padding: 20px; /* Made more compact */
-            border-radius: 15px; /* Made more compact */
+            padding: 40px; /* Slightly reduced padding */
+            border-radius: 20px; /* Slightly smaller border radius */
             text-align: center;
             z-index: 1000;
             display: none;
-            box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.5); /* Smaller shadow */
+            box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.5); /* Stronger shadow */
             display: flex; /* Ensure flex for centering content */
             flex-direction: column;
             justify-content: center;
@@ -460,31 +460,28 @@
         }
 
         .game-over h2 {
-            font-size: 2rem; /* Made more compact */
-            margin-bottom: 15px; /* Made more compact */
+            font-size: 2.5rem;
+            margin-bottom: 20px;
             color: #F42A41; /* Red for emphasis */
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.7); /* Smaller shadow */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
         }
 
         .game-over p {
-            font-size: 0.9rem; /* Made more compact */
             color: white; /* Ensure paragraph text is white */
-            margin-bottom: 10px; /* Made more compact */
+            margin-bottom: 15px;
         }
 
         .game-over button {
-            margin-top: 15px; /* Made more compact */
-            padding: 10px 20px; /* Made more compact */
-            font-size: 1.2rem; /* Made more compact */
+            margin-top: 20px;
         }
 
         .game-over-image {
-            max-width: 70%; /* Made more compact */
+            max-width: 80%;
             height: auto;
             border-radius: 10px;
-            margin-bottom: 15px; /* Made more compact */
+            margin-bottom: 20px;
             border: 3px solid #F42A41; /* Red border for the image */
-            box-shadow: 0 0 15px rgba(244, 42, 65, 0.7); /* Smaller shadow */
+            box-shadow: 0 0 20px rgba(244, 42, 65, 0.7);
         }
 
         .start-screen {
@@ -503,44 +500,43 @@
             color: black; /* All text black */
             text-align: center;
             z-index: 1000;
-            box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.37); /* Smaller shadow */
-            padding: 20px; /* Added padding for mobile */
+            box-shadow: 0 20px 40px 0 rgba(0, 0, 0, 0.37); /* Glass shadow */
         }
 
         /* Removed gradientShift animation for start-screen */
 
         .start-screen h1 {
-            font-size: 2.8rem; /* Made more compact */
-            margin-bottom: 15px; /* Made more compact */
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.5); /* Smaller shadow */
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.5);
             animation: titleGlow 3s infinite alternate;
         }
 
         .start-screen h2 {
-            font-size: 1.5rem; /* Made more compact */
-            margin-bottom: 20px; /* Made more compact */
+            font-size: 2rem;
+            margin-bottom: 30px;
             color: #006A4E; /* Green */
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.7); /* Smaller shadow */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
         }
 
         .start-screen p {
-            font-size: 1rem; /* Made more compact */
-            margin-bottom: 15px; /* Made more compact */
-            max-width: 90%; /* Adjusted for mobile */
-            line-height: 1.5;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            max-width: 700px;
+            line-height: 1.6;
         }
 
         .start-btn {
-            padding: 12px 25px; /* Made more compact */
-            font-size: 1.4rem; /* Made more compact */
+            padding: 18px 40px;
+            font-size: 1.8rem;
             font-weight: bold;
             background: linear-gradient(45deg, #F42A41, #FF6B6B); /* Red button */
             color: white;
             border: none;
-            border-radius: 10px; /* Made more compact */
+            border-radius: 15px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(244, 42, 65, 0.4); /* Smaller shadow */
+            box-shadow: 0 10px 30px rgba(244, 42, 65, 0.4);
             font-family: 'Noto Sans Bengali', Arial, sans-serif;
         }
 
@@ -553,28 +549,28 @@
             position: absolute;
             background: rgba(0, 0, 0, 0.8); /* Darker semi-transparent for text */
             color: white; /* White text on dark bubble */
-            padding: 8px 12px; /* Made more compact */
-            border-radius: 15px; /* Made more compact */
-            font-size: 12px; /* Made more compact */
+            padding: 12px 18px;
+            border-radius: 20px;
+            font-size: 14px;
             font-weight: bold;
             animation: fadeOut 4s forwards;
             z-index: 150;
             border: 2px solid #006A4E; /* Green border */
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3); /* Smaller shadow */
-            max-width: 180px; /* Made more compact */
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            max-width: 200px;
             text-align: center;
         }
 
         .speech-bubble::after {
             content: '';
             position: absolute;
-            bottom: -10px; /* Made more compact */
-            left: 20px; /* Made more compact */
+            bottom: -12px;
+            left: 30px;
             width: 0;
             height: 0;
-            border-left: 10px solid transparent; /* Made more compact */
-            border-right: 10px solid transparent; /* Made more compact */
-            border-top: 10px solid rgba(0, 0, 0, 0.8); /* Match bubble background */
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 12px solid rgba(0, 0, 0, 0.8); /* Match bubble background */
         }
 
         @keyframes fadeOut {
@@ -638,22 +634,22 @@
 
         .mobile-controls {
             position: absolute;
-            bottom: 10px; /* Made more compact */
+            bottom: 10px; /* Adjusted for better mobile visibility */
             left: 50%;
             transform: translateX(-50%);
             display: none;
-            gap: 10px; /* Made more compact */
+            gap: 20px;
             z-index: 1000;
         }
 
         .mobile-btn {
-            width: 50px; /* Made more compact */
-            height: 50px; /* Made more compact */
+            width: 60px;
+            height: 60px;
             background: rgba(0, 0, 0, 0.2); /* Semi-transparent black */
             border: 2px solid rgba(0, 0, 0, 0.5);
             border-radius: 50%;
             color: white; /* White icons on dark buttons */
-            font-size: 20px; /* Made more compact */
+            font-size: 24px;
             backdrop-filter: blur(10px);
             cursor: pointer;
             transition: all 0.3s ease;
@@ -675,7 +671,7 @@
             justify-content: center;
             align-items: center;
             color: #F42A41; /* Red countdown */
-            font-size: 8rem; /* Made more compact */
+            font-size: 10rem;
             font-weight: bold;
             z-index: 1001;
             display: none; /* Hidden by default */
@@ -690,30 +686,30 @@
             backdrop-filter: blur(10px); /* Glass blur */
             border: 1px solid rgba(0, 0, 0, 0.2);
             color: black; /* All text black */
-            padding: 30px; /* Made more compact */
-            border-radius: 20px; /* Made more compact */
+            padding: 50px;
+            border-radius: 25px;
             text-align: center;
             z-index: 1000;
             display: none;
-            box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.37); /* Smaller shadow */
+            box-shadow: 0 20px 40px 0 rgba(0, 0, 0, 0.37); /* Glass shadow */
             flex-direction: column;
-            gap: 15px; /* Made more compact */
+            gap: 20px;
         }
 
         .pause-menu h2 {
-            font-size: 2rem; /* Made more compact */
-            margin-bottom: 15px; /* Made more compact */
+            font-size: 2.5rem;
+            margin-bottom: 20px;
             color: #006A4E; /* Green */
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.7); /* Smaller shadow */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
         }
 
         /* New style for damage indicator */
         .damage-indicator {
             position: absolute;
-            font-size: 20px; /* Made more compact */
+            font-size: 24px;
             font-weight: bold;
             color: #F42A41; /* Red color for damage */
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); /* Smaller shadow */
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
             z-index: 250;
             animation: floatUpFadeOut 1s ease-out forwards;
             pointer-events: none; /* Ensure it doesn't block clicks */
@@ -722,7 +718,7 @@
 
         @keyframes floatUpFadeOut {
             0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-40px); opacity: 0; } /* Made more compact */
+            100% { transform: translateY(-50px); opacity: 0; }
         }
 
 
@@ -736,45 +732,31 @@
             }
             
             .start-screen h1 {
-                font-size: 2.2rem; /* Adjusted for smaller screens */
+                font-size: 2.5rem;
             }
             
             .start-screen h2 {
-                font-size: 1.3rem; /* Adjusted for smaller screens */
+                font-size: 1.5rem;
             }
             
             .start-screen p {
-                font-size: 0.9rem; /* Adjusted for smaller screens */
+                font-size: 1.1rem;
             }
 
             .countdown-overlay {
-                font-size: 5rem; /* Adjusted for smaller screens */
+                font-size: 6rem;
             }
 
             .pause-menu {
-                padding: 20px; /* Adjusted for smaller screens */
+                padding: 30px;
             }
 
             .pause-menu h2 {
-                font-size: 1.5rem; /* Adjusted for smaller screens */
+                font-size: 1.8rem;
             }
 
-            .game-over h2 {
-                font-size: 1.8rem; /* Adjusted for smaller screens */
-            }
-
-            .game-over p {
-                font-size: 0.8rem; /* Adjusted for smaller screens */
-            }
-
-            .game-over button {
-                font-size: 1rem; /* Adjusted for smaller screens */
-                padding: 8px 15px; /* Adjusted for smaller screens */
-            }
-
-            .start-btn {
-                font-size: 1.2rem; /* Adjusted for smaller screens */
-                padding: 10px 20px; /* Adjusted for smaller screens */
+            .player {
+                bottom: 10px; /* Further adjusted for mobile */
             }
         }
     </style>
@@ -899,7 +881,7 @@
                 color: '#F42A41', /* Red color for this boss */
                 challenge: "propaganda" // A new challenge type for flavor
             },
-            { name: "কমন সেন্স দৈত্য", emoji: "🧠", healthMultiplier: 5, speed: 1, color: '#F42A41' }, /* Red */
+            { name: "কমন সেন্স দৈত্য", emoji: "�", healthMultiplier: 5, speed: 1, color: '#F42A41' }, /* Red */
             { name: "নীতি বিশেষজ্ঞ হাইড্রো", emoji: "📜", healthMultiplier: 15, speed: 1.2, color: '#006A4E', challenge: "shooting" }, /* Green */
             { name: "সংবিধান ভূত", emoji: "👻", healthMultiplier: 10, speed: 1.5, color: '#F42A41' } /* Red */
         ];
