@@ -380,7 +380,7 @@
         }
 
         .explosion::before {
-            content: '💥';
+            content: '�';
             position: absolute;
             top: 50%;
             left: 50%;
@@ -632,9 +632,10 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); /* Glass shadow */
         }
 
-        .mobile-controls {
+        /* Mobile controls are now swipe-based, so this div is removed from HTML */
+        /* .mobile-controls {
             position: absolute;
-            bottom: 10px; /* Adjusted for better mobile visibility */
+            bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
             display: none;
@@ -645,10 +646,10 @@
         .mobile-btn {
             width: 60px;
             height: 60px;
-            background: rgba(0, 0, 0, 0.2); /* Semi-transparent black */
+            background: rgba(0, 0, 0, 0.2);
             border: 2px solid rgba(0, 0, 0, 0.5);
             border-radius: 50%;
-            color: white; /* White icons on dark buttons */
+            color: white;
             font-size: 24px;
             backdrop-filter: blur(10px);
             cursor: pointer;
@@ -658,7 +659,7 @@
         .mobile-btn:active {
             transform: scale(0.95);
             background: rgba(0, 0, 0, 0.4);
-        }
+        } */
 
         .countdown-overlay {
             position: absolute;
@@ -723,12 +724,13 @@
 
 
         @media (max-width: 768px) {
-            .mobile-controls {
+            /* Mobile controls are now swipe-based, so this display rule is removed */
+            /* .mobile-controls {
                 display: flex;
-            }
+            } */
             
             .controls {
-                display: none;
+                display: none; /* Hide desktop controls on mobile */
             }
             
             .start-screen h1 {
@@ -762,14 +764,15 @@
     </style>
 </head>
 <body>
-    <div class="game-container">
+    <div class="game-container" id="gameContainer">
         <div class="particles" id="particles"></div>
         
         <div class="start-screen" id="startScreen">
             <h1>🗳️ নির্বাচন ব্লাস্টার 🗳️</h1>
             <h2>মির্জা ফখরুলের চূড়ান্ত সমাধান!</h2>
             <p><strong>যখন বিশৃঙ্খলা দেখা দেয়, তখন একটিই অস্ত্র... ব্যালট ব্লাস্টার!</strong></p>
-            <p>🎮 তীর চিহ্ন দিয়ে চলুন, স্পেসবার দিয়ে সমস্যার উপর ভোট নিক্ষেপ করুন!</p>
+            <p>🎮 **মোবাইলে:** বাম/ডানে সোয়াইপ করে চলুন, ট্যাপ করে গুলি করুন!</p>
+            <p>**ডেস্কটপে:** তীর চিহ্ন দিয়ে চলুন, স্পেসবার দিয়ে সমস্যার উপর ভোট নিক্ষেপ করুন!</p>
             <p><strong>⚠️ সতর্কতা:</strong> জেনজেড বোমা (💣) এ গুলি করবেন না - তাৎক্ষণিক গেম ওভার!</p>
             <p><strong>মনে রাখবেন: শুধু নির্বাচনই আমাদের রক্ষা করতে পারে!</strong></p>
             <button class="start-btn" onclick="startGame()">গণতন্ত্র শুরু করুন!</button>
@@ -803,11 +806,12 @@
             <div>স্পেসবার = গুলি</div>
         </div>
 
-        <div class="mobile-controls">
+        <!-- Mobile controls are now handled by swipe gestures on gameContainer -->
+        <!-- <div class="mobile-controls">
             <button class="mobile-btn" id="leftBtn">⬅️</button>
             <button class="mobile-btn" id="rightBtn">➡️</button>
             <button class="mobile-btn" id="shootBtn">🗳️</button>
-        </div>
+        </div> -->
 
         <div class="countdown-overlay" id="countdownOverlay"></div>
 
@@ -881,7 +885,7 @@
                 color: '#F42A41', /* Red color for this boss */
                 challenge: "propaganda" // A new challenge type for flavor
             },
-            { name: "কমন সেন্স দৈত্য", emoji: "�", healthMultiplier: 5, speed: 1, color: '#F42A41' }, /* Red */
+            { name: "কমন সেন্স দৈত্য", emoji: "🧠", healthMultiplier: 5, speed: 1, color: '#F42A41' }, /* Red */
             { name: "নীতি বিশেষজ্ঞ হাইড্রো", emoji: "📜", healthMultiplier: 15, speed: 1.2, color: '#006A4E', challenge: "shooting" }, /* Green */
             { name: "সংবিধান ভূত", emoji: "👻", healthMultiplier: 10, speed: 1.5, color: '#F42A41' } /* Red */
         ];
@@ -1571,7 +1575,7 @@
             }
         }
 
-        // Event Listeners
+        // Event Listeners for Desktop (Keyboard)
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft') gameState.keys.left = true;
             if (e.key === 'ArrowRight') gameState.keys.right = true;
@@ -1584,16 +1588,59 @@
             if (e.key === ' ') gameState.keys.space = false;
         });
 
-        // Mobile Controls
-        document.getElementById('leftBtn').addEventListener('touchstart', () => gameState.keys.left = true);
-        document.getElementById('leftBtn').addEventListener('touchend', () => gameState.keys.left = false);
-        document.getElementById('rightBtn').addEventListener('touchstart', () => gameState.keys.right = true);
-        document.getElementById('rightBtn').addEventListener('touchend', () => gameState.keys.right = false);
-        document.getElementById('shootBtn').addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Prevent scrolling on touch
-            gameState.keys.space = true;
+        // Mobile Controls (Swipe and Tap)
+        const gameContainer = document.getElementById('gameContainer');
+        let touchStartX = 0;
+        let touchStartY = 0;
+        const swipeThreshold = 30; // Minimum pixels to register a swipe
+        const tapThreshold = 10; // Maximum pixels for a tap (not a swipe)
+
+        gameContainer.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            // Reset movement keys on touch start to prevent sticky movement
+            gameState.keys.left = false;
+            gameState.keys.right = false;
+            gameState.keys.space = false; // Reset shoot key
         });
-        document.getElementById('shootBtn').addEventListener('touchend', () => gameState.keys.space = false); 
+
+        gameContainer.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // Prevent scrolling
+            const currentX = e.touches[0].clientX;
+            const deltaX = currentX - touchStartX;
+
+            if (Math.abs(deltaX) > swipeThreshold) {
+                if (deltaX < 0) {
+                    gameState.keys.left = true;
+                    gameState.keys.right = false;
+                } else {
+                    gameState.keys.right = true;
+                    gameState.keys.left = false;
+                }
+            } else {
+                gameState.keys.left = false;
+                gameState.keys.right = false;
+            }
+        });
+
+        gameContainer.addEventListener('touchend', (e) => {
+            const finalX = e.changedTouches[0].clientX;
+            const finalY = e.changedTouches[0].clientY;
+            const deltaX = finalX - touchStartX;
+            const deltaY = finalY - touchStartY;
+
+            // If it was a tap (minimal movement), trigger shoot
+            if (Math.abs(deltaX) < tapThreshold && Math.abs(deltaY) < tapThreshold) {
+                gameState.keys.space = true; // Set to true for one frame
+                // The game loop's shootingInterval will handle the actual shot timing
+                // We immediately set it back to false to ensure it's a single shot per tap
+                setTimeout(() => { gameState.keys.space = false; }, 50); 
+            }
+
+            // Always reset movement keys on touchend
+            gameState.keys.left = false;
+            gameState.keys.right = false;
+        });
 
         // Initial setup
         window.onload = () => {
